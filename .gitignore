@@ -1,0 +1,48 @@
+# Ignore Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Ignore Python cache files
+__pycache__/
+*.py[cod]
+
+# Ignore virtual environment directories
+env/
+venv/
+
+# Ignore VSCode settings
+.vscode/
+
+# Ignore system files
+.DS_Store
+Thumbs.db
+
+# Ignore configuration and log files
+*.log
+*.env
+
+# Ignore outputs and temporary files
+*.out
+*.tmp
+*.bak
+
+# Ignore data files (if any)
+*.csv
+*.tsv
+*.data
+*.dat
+
+# Ignore notebook extensions
+*.nbconvert/
+*.nb.html
+
+# Ignore unnecessary archives and binaries
+*.zip
+*.tar
+*.tar.gz
+*.rar
+*.7z
+*.bin
+
+# Custom - Add any specific files/directories you want to ignore
+# For example:
+# sensitive-data/
