@@ -6,11 +6,11 @@
 - Activate env
   - For windows `env\Scripts\activate`
   - For Mac `source env/bin/activate`
-- `pip install -r requirements.txt`
+- [optional] : `pip install -r requirements.txt` : since the main script already contains installing dependencies code.
 
 ### If are working in vscode
 
-- Make sure that you have python externsion installed in vscode
+- Make sure that you have python externsion and Jupiter Extension installed in vscode
 - Open command Palette:
   - For windows : `Crt + Shift +P`
   - For Mac : `Cmd + Shift + P`
