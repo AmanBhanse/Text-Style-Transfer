@@ -7,6 +7,7 @@
   - For windows `env\Scripts\activate`
   - For Mac `source env/bin/activate`
 - [optional] : `pip install -r requirements.txt` : since the main script already contains installing dependencies code.
+- if you want to deactivate env, you can use `deactivate`
 
 ### If are working in vscode
 
