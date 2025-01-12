@@ -66,6 +66,10 @@ def fetch_and_parse(url: str) -> str:
     except requests.RequestException as e:
         return f"Error fetching the webpage: {e}"   
 
+def test_fetch_and_parse():
+    url = "https://en.wikipedia.org/wiki/Artificial_intelligence"
+    fetch_and_parse(url)
+
 
 def split_text_into_documents(text: str, chunk_size: int = 1000, overlap: int = 100):
     """
