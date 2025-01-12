@@ -6,8 +6,9 @@ import os
 # 1. Access to Hugging face
 
 # Prompt user for Hugging Face API token if not already set
-if "HUGGINGFACEHUB_API_TOKEN" not in os.environ:
-    os.environ["HUGGINGFACEHUB_API_TOKEN"] = getpass.getpass("Enter your Huggingfacehub API token: ")
+def init_huggingface_api():
+    if "HUGGINGFACEHUB_API_TOKEN" not in os.environ:
+        os.environ["HUGGINGFACEHUB_API_TOKEN"] = getpass.getpass("Enter your Huggingfacehub API token: ")
 
 
 # 2. Packages
@@ -43,18 +44,27 @@ def fetch_and_parse(url: str) -> str:
     - str: Cleaned text content extracted from the webpage.
     """
 
-    # Step 1: Fetch the webpage content using the requests library.
-    # Fetch the content of the URL.
-    # Ensure the request is successful.
+    try:
+        # Fetch the content of the URL.
+        response = requests.get(url)
 
-    # Step 2: Parse the HTML content using BeautifulSoup.
+        # Ensure the request is successful.
+        response.raise_for_status()  # Raise an exception for HTTP errors
 
-    # Step 3: Extract the text content from the parsed HTML.
+        # Step 2: Parse the HTML content using BeautifulSoup.
+        soup = BeautifulSoup(response.content, 'html.parser')
 
-    # Step 4: Return the cleaned text.
+        # Step 3: Extract the text content from the parsed HTML.
+        text = soup.get_text()
 
-    # Write your code here.
-    pass
+        # Step 4: Return the cleaned text.
+        # Aman : Not sure what cleaned text is ? Probably removing unnesscessary blank space
+        cleaned_text = ' '.join(text.split())
+
+        return cleaned_text
+
+    except requests.RequestException as e:
+        return f"Error fetching the webpage: {e}"   
 
 
 def split_text_into_documents(text: str, chunk_size: int = 1000, overlap: int = 100):
@@ -73,8 +83,23 @@ def split_text_into_documents(text: str, chunk_size: int = 1000, overlap: int = 
     # Initialize an empty list to store the chunks.
     docs = []
 
-    # Write your code here.
-    pass
+    # Error check
+    if overlap >= chunk_size:
+        raise ValueError("Overlap must be smaller than the chunk size.")
+
+    # Logic to split into chucks
+    start = 0
+    while start < len(text):
+        end = min(start + chunk_size, len(text))
+        
+        chunk = text[start:end]
+        
+        docs.append(Document(page_content=chunk))
+        
+        # Move the start index forward by chunk_size - overlap.
+        start += chunk_size - overlap
+
+    return docs
 
 
 # 5. Calculate Word Stats
@@ -98,17 +123,36 @@ def calculate_word_stats(texts):
     # Step 2: Iterate through each document in the `texts` list.
     for doc in texts:
         # Hint: `doc.page_content` contains the text of the document.
-        pass  # Replace with your implementation.
+        page_content = doc.page_content
+        total_characters += len(page_content)
+        words = page_content.split() #this also takes care of triming or striping
+        total_words += len(words)
 
     # Step 3: Calculate the average words and characters per document.
     # - Avoid division by zero by checking if the `texts` list is not empty.
-    avg_words = 0  # Replace with your implementation.
-    avg_characters = 0  # Replace with your implementation.
+    num_documents = len(texts)
+    avg_words = total_words / num_documents if num_documents > 0 else 0
+    avg_characters = total_characters / num_documents if num_documents > 0 else 0
 
     # Step 4: Print the calculated averages in a readable format.
     # Example: "Average words per document: 123.45"
     print(f"Average words per document: {avg_words}")
     print(f"Average characters per document: {avg_characters}")
+
+
+# Execute this cell to test your calculate_word_stats function.
+# Create sample Document objects with text content for testing your code above.
+def test_calculate_word_stats():
+    sample_docs = [
+        Document(page_content="This is the first test document."),
+        Document(page_content="Here is another example document for testing."),
+        Document(page_content="Short text."),
+        Document(page_content="This document has more content. It's longer and has more words in it for testing purposes."),
+    ]
+
+    # Call the function with the sample documents to calculate word statistics.
+    calculate_word_stats(sample_docs)
+
 
 
 # 6. Set Up LLM
@@ -191,27 +235,30 @@ class BM25Retriever:
         # Step 3: Return the top `k` relevant documents.
         pass  # Replace this with your implementation.
 
+
+# TESTING
 from langchain.schema import Document
 
-# Create sample Document objects.
-sample_docs = [
-    Document(page_content="Machine learning is a method of data analysis that automates analytical model building."),
-    Document(page_content="Deep learning is a subset of machine learning that uses neural networks with three or more layers."),
-    Document(page_content="Artificial intelligence encompasses a wide range of technologies, including machine learning and deep learning."),
-    Document(page_content="Natural language processing is a field of AI focused on the interaction between computers and human language."),
-]
+def test_b25():
+    # Create sample Document objects.
+    sample_docs = [
+        Document(page_content="Machine learning is a method of data analysis that automates analytical model building."),
+        Document(page_content="Deep learning is a subset of machine learning that uses neural networks with three or more layers."),
+        Document(page_content="Artificial intelligence encompasses a wide range of technologies, including machine learning and deep learning."),
+        Document(page_content="Natural language processing is a field of AI focused on the interaction between computers and human language."),
+    ]
 
-# Initialize the retriever with the sample documents.
-retriever = BM25Retriever(sample_docs)
+    # Initialize the retriever with the sample documents.
+    retriever = BM25Retriever(sample_docs)
 
-# Test the retriever with a query.
-query = "What is machine learning?"
-top_docs = retriever.retrieve(query, k=2)
+    # Test the retriever with a query.
+    query = "What is machine learning?"
+    top_docs = retriever.retrieve(query, k=2)
 
-# Print the results.
-print("Top Relevant Documents:")
-for idx, doc in enumerate(top_docs, 1):
-    print(f"{idx}. {doc}")
+    # Print the results.
+    print("Top Relevant Documents:")
+    for idx, doc in enumerate(top_docs, 1):
+        print(f"{idx}. {doc}")
 
 
 # 8. Build Chroma
@@ -248,22 +295,26 @@ def build_chroma(documents: list[Document]) -> Chroma:
     # Step 4: Return the Chroma vector store for later use.
     return vector_store
 
+
+# Testing 
+
 from langchain.schema import Document
 
-# Create sample Document objects.
-sample_docs = [
-    Document(page_content="Machine learning is a method of data analysis that automates analytical model building."),
-    Document(page_content="Deep learning is a subset of machine learning that uses neural networks with three or more layers."),
-    Document(page_content="Artificial intelligence encompasses a wide range of technologies, including machine learning and deep learning."),
-    Document(page_content="Natural language processing is a field of AI focused on the interaction between computers and human language."),
-]
+def test_build_chroma():
+    # Create sample Document objects.
+    sample_docs = [
+        Document(page_content="Machine learning is a method of data analysis that automates analytical model building."),
+        Document(page_content="Deep learning is a subset of machine learning that uses neural networks with three or more layers."),
+        Document(page_content="Artificial intelligence encompasses a wide range of technologies, including machine learning and deep learning."),
+        Document(page_content="Natural language processing is a field of AI focused on the interaction between computers and human language."),
+    ]
 
-# Call the function to build the Chroma vector store.
-vector_store = build_chroma(sample_docs)
+    # Call the function to build the Chroma vector store.
+    vector_store = build_chroma(sample_docs)
 
-# Test retrieval (optional, if supported).
-print("Vector store built successfully!")
-print(vector_store)  # Print the vector store object to verify.
+    # Test retrieval (optional, if supported).
+    print("Vector store built successfully!")
+    print(vector_store)  # Print the vector store object to verify.
 
 
 # 9. Ensemble Retriever
@@ -330,7 +381,11 @@ class EnsembleRetriever:
 
         # Step 5: Return the top-k unique documents.
         return None  # Replace with your implementation.
+
+
 from langchain.schema import Document
+
+
 
 # Sample documents
 sample_docs = [
@@ -349,21 +404,22 @@ class MockBM25:
     def retrieve(self, query, k):
         return ["Deep learning is a type of machine learning using neural networks."]
 
-# Initialize mock retrievers
-chroma = MockChroma()
-bm25 = MockBM25()
+def test_mocking():
+    # Initialize mock retrievers
+    chroma = MockChroma()
+    bm25 = MockBM25()
 
-# Initialize EnsembleRetriever
-ensemble_retriever = EnsembleRetriever(chroma, bm25)
+    # Initialize EnsembleRetriever
+    ensemble_retriever = EnsembleRetriever(chroma, bm25)
 
-# Test the retriever with a query
-query = "What is machine learning?"
-results = ensemble_retriever.get_relevant_documents(query, k=3)
+    # Test the retriever with a query
+    query = "What is machine learning?"
+    results = ensemble_retriever.get_relevant_documents(query, k=3)
 
-# Print the results
-print("Ensemble Retrieval Results:")
-for idx, doc in enumerate(results, 1):
-    print(f"{idx}. {doc.page_content}")
+    # Print the results
+    print("Ensemble Retrieval Results:")
+    for idx, doc in enumerate(results, 1):
+        print(f"{idx}. {doc.page_content}")
 
 from langchain_core.output_parsers import BaseOutputParser
 
@@ -408,9 +464,7 @@ def format_docs(docs):
 # Define the style transfer prompt template
 style_prompt = PromptTemplate(
     input_variables=["style", "context", "original_text"],
-    template=(
-              # Replace with your prompt for changing the style of the text. Avoid using complicated prompts.
-    )
+    template="Given the style '{style}' and context '{context}', transform the text: {original_text} into the desired style."
 )
 
 from langchain.schema import Document
@@ -423,6 +477,8 @@ def setup_llm():
         temperature=0.7
     )
 
+# TEST 
+
 # Sample documents
 sample_docs = [
     Document(page_content="Machine learning automates data analysis."),
@@ -430,31 +486,32 @@ sample_docs = [
     Document(page_content="Artificial intelligence includes various technologies."),
 ]
 
-# Test the format_docs function
-formatted_docs = format_docs(sample_docs)
-print("Formatted Documents:\n")
-print(formatted_docs)
+def test_format_docs():
+    # Test the format_docs function
+    formatted_docs = format_docs(sample_docs)
+    print("Formatted Documents:\n")
+    print(formatted_docs)
 
-# Test the style_prompt with sample inputs
-style = "poetic"
-context = formatted_docs
-original_text = "Artificial intelligence is transforming the world."
+    # Test the style_prompt with sample inputs
+    style = "poetic"
+    context = formatted_docs
+    original_text = "Artificial intelligence is transforming the world."
 
-styled_prompt = style_prompt.format(
-    style=style,
-    context=context,
-    original_text=original_text,
-)
+    styled_prompt = style_prompt.format(
+        style=style,
+        context=context,
+        original_text=original_text,
+    )
 
-print("\nGenerated Prompt for Style Transfer:\n")
-print(styled_prompt)
+    print("\nGenerated Prompt for Style Transfer:\n")
+    print(styled_prompt)
 
-# Pass the prompt to the LLM
-llm = setup_llm()  # Initialize the LLM
-styled_output = llm(styled_prompt)  # Generate the styled text
+    # Pass the prompt to the LLM
+    llm = setup_llm()  # Initialize the LLM
+    styled_output = llm(styled_prompt)  # Generate the styled text
 
-print("\n--- Rewritten (Styled) Text ---")
-print(styled_output)
+    print("\n--- Rewritten (Styled) Text ---")
+    print(styled_output)
 
 
 # 11. RAG chain
@@ -535,7 +592,7 @@ def build_rag_chain(llm, chroma_store, bm25_retriever):
 
 # 12. Final response
 
-if __name__ == "__main__":
+def main():
     """
     Main script for scraping, building retrievers, setting up the RAG chain,
     and running a neural style transfer demo.
@@ -606,3 +663,8 @@ if __name__ == "__main__":
 
     print("\n--- Styled Output ---")
     print(styled_result)
+
+
+
+if __name__ == "__main__":
+    main()
