@@ -79,6 +79,8 @@ def split_text_into_documents(text: str, chunk_size: int = 1000, overlap: int = 
 # 5. Calculate Word Stats
 
 def calculate_word_stats(texts):
+    # I will work on this
+
     """
     Calculate and display average word and character statistics for a list of documents.
 
