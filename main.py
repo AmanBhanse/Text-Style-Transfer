@@ -212,12 +212,25 @@ class BM25Retriever:
         """
         # Step 1: Store the input documents.
         # Hint: Use the `page_content` attribute of each Document object to extract text.
-
+        self.documents=documents
+        texts=[]
+        for doc in documents:
+            content=doc.page_content
+            texts.append(content)
+            # word_count= len(content.split())
+            # char_count=len(content)
+            # total_words+=word_count
+            # total_characters+=char_count
+        
+        num_docs=len(documents)
         # Step 2: Tokenize the corpus.
         # Hint: Use the `.split()` method to tokenize each document into words.
+        tokenized_corpus=[i.lower().split(" ") for i in texts]
 
         # Step 3: Initialize the BM25 retriever with the tokenized corpus.
-        pass  # Replace this with your implementation.
+        self.bm25 = BM25Okapi(tokenized_corpus)
+        # pass  # Replace this with your implementation.
+        # doc_scores = bm25.get_scores()
 
     def retrieve(self, query, k=5):
         """
@@ -232,12 +245,18 @@ class BM25Retriever:
         """
         # Step 1: Tokenize the input query.
         # Hint: Use `.split()` to tokenize the query into words.
+        # res=[query.split()]
+        tokenized_query = query.lower().split(" ")
 
         # Step 2: Use the BM25 retriever to score and rank documents.
         # Hint: Use the `bm25.get_top_n()` method to retrieve the top `k` documents.
-
+        
         # Step 3: Return the top `k` relevant documents.
-        pass  # Replace this with your implementation.
+        # pass  # Replace this with your implementation.
+
+        top_documents= self.bm25.get_top_n(tokenized_query,self.texts,k)
+
+        return top_documents
 
 
 # TESTING
