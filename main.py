@@ -361,8 +361,8 @@ class EnsembleRetriever:
         """
         # Step 1: Store the Chroma vector store and BM25 retriever.
         # Hint: Assign the inputs `chroma_store` and `bm25_retriever` to instance variables.
-        self.chroma_store = None  # Replace with your implementation.
-        self.bm25_retriever = None  # Replace with your implementation.
+        self.chroma_store = chroma_store  # Replace with your implementation.
+        self.bm25_retriever = bm25_retriever  # Replace with your implementation.
 
     def get_relevant_documents(self, query: str, k: int = 5):
         """
@@ -377,13 +377,13 @@ class EnsembleRetriever:
         """
 
         # Step 1: Retrieve top-k documents from Chroma (semantic similarity).
-        chroma_docs = None  # Replace with your implementation.
+        chroma_docs = self.chroma_store.similarity_search(query,k)  # Replace with your implementation.
 
         # Step 2: Retrieve top-k documents from BM25 (lexical matching).
-        bm25_docs = None  # Replace with your implementation.
+        bm25_docs = self.bm25_retriever.retrieve(query,k)  # Replace with your implementation.
 
         # Step 3: Combine results from both retrievers into a single list.
-        combined = None  # Replace with your implementation.
+        combined = chroma_docs + bm25_docs  # Replace with your implementation.
 
         # Step 4: Deduplicate the combined results.
         # Hint: Use a `set` to track seen content based on document text.
@@ -392,21 +392,24 @@ class EnsembleRetriever:
         for doc in combined:
             # Retrieve content for deduplication (check if `page_content` exists).
             # Hint: Use `doc.page_content` if it's a Document object; otherwise, use `doc` as is.
-            content = None  # Replace with your implementation.
+            if hasattr(doc,'page_content'):
+                content = doc.page_content
+            else:
+                content = doc  # Replace with your implementation.
 
             # Use the first 60 characters of the document text as a key for deduplication.
-            key = None  # Replace with your implementation.
+            key = content[:60]  # Replace with your implementation.
 
             if key not in seen:
                 # Convert plain strings to Document objects if necessary.
                 # Hint: Use `Document(page_content=doc)` for plain text.
                 if isinstance(doc, str):
-                    doc = None  # Replace with your implementation.
+                    doc = Document(page_content=content)  # Replace with your implementation.0
                 unique_docs.append(doc)
                 seen.add(key)
 
         # Step 5: Return the top-k unique documents.
-        return None  # Replace with your implementation.
+        return unique_docs[:k]  # Replace with your implementation.
 
 
 from langchain.schema import Document
@@ -562,9 +565,8 @@ def build_rag_chain(llm, chroma_store, bm25_retriever):
     Returns:
     - rag_chain: A function that processes inputs through the RAG pipeline.
     """
-
     # Step 1: Define the Ensemble Retriever
-    ensemble_retriever = None  # Replace with your implementation.
+    ensemble_retriever = EnsembleRetriever(chroma_store, bm25_retriever)  # Replace with your implementation.
 
     # Step 2: Define a function to retrieve and format context
     def retrieve_and_format_context(query, k=5):
@@ -579,10 +581,10 @@ def build_rag_chain(llm, chroma_store, bm25_retriever):
         - str: The formatted context string.
         """
         # Step 2.1: Retrieve relevant documents using the ensemble retriever.
-        context_docs = None  # Replace with your implementation.
+        context_docs = ensemble_retriever.get_relevant_documents(query,k)   # Replace with your implementation.
 
         # Step 2.2: Format the retrieved documents.
-        context = None  # Replace with your implementation.
+        context = format_docs(context_docs)  # Replace with your implementation.
 
         return context
 
@@ -603,13 +605,18 @@ def build_rag_chain(llm, chroma_store, bm25_retriever):
 
         # Step 3.1: Retrieve and format the context using the helper function.
         query = inputs["question"]
-        context = None  # Replace with your implementation.
+        context = retrieve_and_format_context(query,k=5)  # Replace with your implementation.
 
         # Step 3.2: Generate the prompt using the `style_prompt`.
-        prompt = None  # Replace with your implementation.
+        prompt = style_prompt.format(
+            style=inputs["style"],
+            context=context,
+            original_text=inputs["original_text"],
+        )  # Replace with your implementation.
 
         # Step 3.3: Pass the prompt through the LLM to generate the output.
-        llm_output = None  # Replace with your implementation.
+        llm_output = setup_llm()  # Replace with your implementation.
+        styled_output = llm_output(prompt) 
 
         # Step 3.4: Parse the LLM's output to extract the final styled text.
         parser = None  # Replace with your implementation.
