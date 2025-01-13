@@ -605,22 +605,21 @@ def build_rag_chain(llm, chroma_store, bm25_retriever):
 
         # Step 3.1: Retrieve and format the context using the helper function.
         query = inputs["question"]
-        context = retrieve_and_format_context(query,k=5)  # Replace with your implementation.
+        context = retrieve_and_format_context(query,k=5)
 
         # Step 3.2: Generate the prompt using the `style_prompt`.
         prompt = style_prompt.format(
             style=inputs["style"],
             context=context,
             original_text=inputs["original_text"],
-        )  # Replace with your implementation.
+        )
 
         # Step 3.3: Pass the prompt through the LLM to generate the output.
-        llm_output = setup_llm()  # Replace with your implementation.
-        styled_output = llm_output(prompt) 
+        llm_response = llm(prompt)
 
         # Step 3.4: Parse the LLM's output to extract the final styled text.
-        parser = None  # Replace with your implementation.
-        result = None  # Replace with your implementation.
+        parser = RunnablePassthrough()
+        result = parser.invoke(llm_response)
 
         return result
 
@@ -704,4 +703,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    test_mocking()
