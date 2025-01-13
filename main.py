@@ -162,7 +162,7 @@ def test_calculate_word_stats():
 # 6. Set Up LLM
 from langchain_huggingface import HuggingFaceEndpoint
 
-def setup_llm(repo_id="mistralai/Mistral-7B-Instruct-v0.3"):
+def setup_llm(repo_id="mistralai/Mistral-7B-Instruct-v0.3" , temperature=1.0):
     """
     Set up and return a Hugging Face LLM using the specified model repository ID and generation parameters.
 
@@ -174,17 +174,20 @@ def setup_llm(repo_id="mistralai/Mistral-7B-Instruct-v0.3"):
     - HuggingFaceEndpoint: A configured LLM object ready for text generation.
     """
 
-    # Step 1: Import the HuggingFaceEndpoint class.
-    # - This class allows you to connect to a Hugging Face model hosted on an endpoint.
+    hugging_face_token = os.environ["HUGGINGFACEHUB_API_TOKEN"]
 
-    # Step 2: Configure the LLM connection.
-    # - Use the HuggingFaceEndpoint class to set up the LLM.
+    # Step 1: Import the HuggingFaceEndpoint class & Configure the LLM connection
+    # - This class allows you to connect to a Hugging Face model hosted on an endpoint.
+    llm = HuggingFaceEndpoint(
+        repo_id=repo_id,
+        max_length=128,
+        temperature=temperature,
+        huggingfacehub_api_token=hugging_face_token,
+    )
 
     # Step 3: Return the configured LLM object.
     # - The returned LLM can be used for generating text based on input prompts.
-
-    # Write your code here.
-    pass
+    return llm
 
 
 # 7. BM25 Retriever
@@ -448,7 +451,7 @@ def format_docs(docs):
     # Step 1: Check if the list of documents is empty.
     # Hint: If `docs` is empty, return the string "No relevant context found."
     if not docs:
-        pass  # Replace with your implementation.
+        return "No relevant context found."
 
     # Step 2: Initialize an empty list to store formatted snippets.
     snippet_list = []
@@ -459,10 +462,14 @@ def format_docs(docs):
     # - Replace newlines with spaces and remove unnecessary whitespace.
     # - Add a formatted string to the `snippet_list` (e.g., "1. Cleaned content").
     for i, doc in enumerate(docs):
-        pass  # Replace with your implementation.
+        content = doc.page_content
+        cleaned_content = " ".join(content.split())  # Replace newlines and extra spaces with a single space.
+
+        # Add a formatted string to the `snippet_list`.
+        snippet_list.append(f"{i + 1}. {cleaned_content}")
 
     # Step 4: Join the snippets with newline characters and return the result.
-    return None  # Replace with your implementation.
+    return "\n".join(snippet_list)
 
 
 # Define the style transfer prompt template
@@ -475,11 +482,11 @@ from langchain.schema import Document
 from langchain_huggingface import HuggingFaceEndpoint  # Or the specific LLM library you're using
 
 # Example setup for LLM (ensure this is compatible with your LLM)
-def setup_llm():
-    return HuggingFaceEndpoint(
-        repo_id="mistralai/Mistral-7B-Instruct-v0.3",  # Replace with the appropriate model
-        temperature=0.7
-    )
+# def setup_llm():
+#     return HuggingFaceEndpoint(
+#         repo_id="mistralai/Mistral-7B-Instruct-v0.3",  # Replace with the appropriate model
+#         temperature=0.7
+#     )
 
 # TEST 
 
