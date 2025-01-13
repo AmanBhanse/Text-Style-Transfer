@@ -307,16 +307,16 @@ def build_chroma(documents: list[Document]) -> Chroma:
     # Step 1: Initialize Hugging Face embeddings.
     # - Use a pre-trained embedding model (e.g., "sentence-transformers/all-mpnet-base-v2").
     # - HuggingFaceEmbeddings generates dense vector representations for text.
-    embeddings = None  # Replace with your implementation.
+    embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-mpnet-base-v2")
 
     # Step 2: Initialize the Chroma vector store.
     # - Set the collection name for the vector store (e.g., "EngGenAI").
     # - Pass the Hugging Face embeddings as the embedding function.
-    vector_store = None  # Replace with your implementation.
+    vector_store = Chroma(collection_name="EngGenAI", embedding_function=embeddings)
 
     # Step 3: Add the input documents to the Chroma vector store.
     # - Use the `add_documents` method to embed and store the documents.
-    pass  # Replace with your implementation.
+    vector_store.add_documents(documents)
 
     # Step 4: Return the Chroma vector store for later use.
     return vector_store
