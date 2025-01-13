@@ -257,7 +257,7 @@ class BM25Retriever:
         # Step 3: Return the top `k` relevant documents.
         # pass  # Replace this with your implementation.
 
-        top_documents= self.bm25.get_top_n(tokenized_query,self.texts,k)
+        top_documents= self.bm25.get_top_n(tokenized_query,self.documents,k)
 
         return top_documents
 
