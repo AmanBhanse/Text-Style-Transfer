@@ -649,10 +649,10 @@ def main():
         print(f"Scraping content from: {url}")
 
         # Step 1B.1: Fetch and parse the raw text from the URL
-        raw_text = None  # Replace with your implementation
+        raw_text = fetch_and_parse(url)
 
         # Step 1B.2: Split the raw text into chunks (documents)
-        splits = None  # Replace with your implementation
+        splits = split_text_into_documents(raw_text)
 
         # Step 1B.3: Add the chunks to the list of documents
         all_docs.extend(splits)
@@ -663,19 +663,19 @@ def main():
     print("Step 2: Building Chroma vector store and BM25 retriever...")
 
     # Step 2A: Build the Chroma vector store
-    chroma_store = None  # Replace with your implementation
+    chroma_store = build_chroma(all_docs)
 
     # Step 2B: Build the BM25 retriever
-    bm25_retriever = None  # Replace with your implementation
+    bm25_retriever = BM25Retriever(all_docs)
 
     # Step 3: Build the RAG chain
     print("Step 3: Building RAG chain...")
 
     # Step 3A: Set up the LLM
-    llm = None  # Replace with your implementation
+    llm = setup_llm()
 
     # Step 3B: Build the RAG chain
-    rag_chain = None  # Replace with your implementation
+    rag_chain = build_rag_chain(llm,chroma_store,bm25_retriever)
 
     # Step 4: Neural Style Transfer Demo
     print("\nStep 4: Neural Style Transfer Demo...")
@@ -695,7 +695,7 @@ def main():
     print("\nStep 5: Running the RAG chain...")
 
     # Hint: Pass `inputs` through the RAG chain to generate styled output.
-    styled_result = None  # Replace with your implementation
+    styled_result = rag_chain(inputs)
 
     print("\n--- Styled Output ---")
     print(styled_result)
