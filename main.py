@@ -615,7 +615,7 @@ def build_rag_chain(llm, chroma_store, bm25_retriever):
         )
 
         # Step 3.3: Pass the prompt through the LLM to generate the output.
-        llm_response = llm(prompt)
+        llm_response = llm.invoke(prompt)
 
         # Step 3.4: Parse the LLM's output to extract the final styled text.
         parser = RunnablePassthrough()
