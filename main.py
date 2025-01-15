@@ -228,7 +228,7 @@ class BM25Retriever:
         num_docs=len(documents)
         # Step 2: Tokenize the corpus.
         # Hint: Use the `.split()` method to tokenize each document into words.
-        tokenized_corpus=[i.lower().split(" ") for i in texts]
+        tokenized_corpus=[i.lower().split() for i in texts]
 
         # Step 3: Initialize the BM25 retriever with the tokenized corpus.
         self.bm25 = BM25Okapi(tokenized_corpus)
@@ -249,7 +249,7 @@ class BM25Retriever:
         # Step 1: Tokenize the input query.
         # Hint: Use `.split()` to tokenize the query into words.
         # res=[query.split()]
-        tokenized_query = query.lower().split(" ")
+        tokenized_query = query.lower().split()
 
         # Step 2: Use the BM25 retriever to score and rank documents.
         # Hint: Use the `bm25.get_top_n()` method to retrieve the top `k` documents.
